@@ -76,8 +76,6 @@ model = tf.matmul(layer_2 if layer_2 is not None else layer_1, w_out) + b_out
 #################################################
 # Softmax cross entropy
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(model, y))
-# Other optimization methods can be used besides Gradient Descent
-# train_step = tf.train.GradientDescentOptimizer(0.01).minimize(cost)
 train_step = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
 
 
