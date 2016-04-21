@@ -1,7 +1,5 @@
-# TASK 1:  Neural network with only 1 hidden layer with 15 neurons.
-# TASK 2:  Neural network with only 1 hidden layer with 150 neurons.
-# TASK 3:  Neural network with 2 hidden layers with 100 neurons in first hidden layer and 15 neurons in the second hidden layer.
 # TASK 4:  Neural network with 2 hidden layer with 500 neurons in first hidden layer and 150 neurons in the second hidden layer.
+# Credit: https://github.com/aymericdamien/TensorFlow-Examples/blob/master/examples/3%20-%20Neural%20Networks/multilayer_perceptron.py#L22
 
 from tensorflow.examples.tutorials.mnist import input_data
 mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
@@ -10,7 +8,8 @@ import tensorflow as tf
 
 INPUT_SIZE = 784         # 16x16 pixel images of handwritten numbers = 784 pixels each
 CLASSIFICATION_SIZE = 10 # Numbers 0 to 9
-NEURONS_IN_HIDDEN_LAYER = 150
+HID_LAYER_1 = 500
+HID_LAYER_2 = 150
 
 #################################################
 # INPUT / OUTPUT
@@ -25,15 +24,18 @@ y = tf.placeholder(tf.float32, [None, CLASSIFICATION_SIZE])
 #MODEL
 #################################################
 # weight and bias matrices
-w       = tf.Variable(tf.random_normal([INPUT_SIZE,                 NEURONS_IN_HIDDEN_LAYER]))
-w_out   = tf.Variable(tf.random_normal([NEURONS_IN_HIDDEN_LAYER,    CLASSIFICATION_SIZE]))
-b       = tf.Variable(tf.random_normal([NEURONS_IN_HIDDEN_LAYER]))
-b_out   = tf.Variable(tf.random_normal([CLASSIFICATION_SIZE]))
+w       = [tf.Variable(tf.random_normal([INPUT_SIZE,                 HID_LAYER_1])),
+           tf.Variable(tf.random_normal([HID_LAYER_1,                HID_LAYER_2]))]
+w_out   =  tf.Variable(tf.random_normal([HID_LAYER_2,                CLASSIFICATION_SIZE]))
 
-layer_1 = tf.nn.sigmoid(tf.add(tf.matmul(x, w), b))
+b       = [tf.Variable(tf.random_normal([HID_LAYER_1])),
+           tf.Variable(tf.random_normal([HID_LAYER_2]))]
+b_out   =  tf.Variable(tf.random_normal([CLASSIFICATION_SIZE]))
 
-model = tf.matmul(layer_1, w_out) + b_out
-
+# Hidden layers
+layer_1 = tf.nn.sigmoid(tf.add(tf.matmul(x, w[0]), b[0]))
+layer_2 = tf.nn.sigmoid(tf.add(tf.matmul(layer_1, w[1]), b[1]))
+model = tf.matmul(layer_2, w_out) + b_out
 
 # OPTIMIZATION
 # Softmax cross entropy
@@ -63,6 +65,5 @@ correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(model,1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 print(sess.run(accuracy, feed_dict={x: mnist.test.images, y: mnist.test.labels}))
 
-#OUTPUT 0.9024              GradientDescentOptimizer using tf.nn.relu
-#OUTPUT 0.8121              GradientDescentOptimizer using tf.nn.sigmoid
-#OUTPUT 0.9487              AdamOptimizer using tf.nn.sigmoid
+# OUTPUT 0.8183     Using GradientDescentOptimizer with tf.nn.sigmoid
+# OUTPUT 0.9495     Using AdamOptimizer with tf.nn.sigmoid
